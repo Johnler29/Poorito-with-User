@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Mountains table
+-- Mountains table (with integrated details)
 CREATE TABLE IF NOT EXISTS mountains (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -23,6 +23,19 @@ CREATE TABLE IF NOT EXISTS mountains (
     difficulty TEXT CHECK (difficulty IN ('Easy', 'Moderate', 'Hard', 'Expert')) NOT NULL,
     description TEXT,
     image_url VARCHAR(500),
+    
+    -- What to bring section (stored as JSON array)
+    what_to_bring JSONB DEFAULT '[]'::jsonb,
+    
+    -- Budgeting section (stored as JSON array)
+    budgeting JSONB DEFAULT '[]'::jsonb,
+    
+    -- Itinerary section (stored as JSON array)
+    itinerary JSONB DEFAULT '[]'::jsonb,
+    
+    -- How to get there section (stored as JSON array)
+    how_to_get_there JSONB DEFAULT '[]'::jsonb,
+    
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -64,6 +77,18 @@ CREATE TABLE IF NOT EXISTS user_activities (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Bookings table (for trail bookings)
+CREATE TABLE IF NOT EXISTS bookings (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    mountain_id BIGINT REFERENCES mountains(id) ON DELETE CASCADE,
+    booking_date DATE NOT NULL,
+    status TEXT CHECK (status IN ('confirmed', 'cancelled', 'completed')) DEFAULT 'confirmed',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, mountain_id, booking_date)
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -74,6 +99,10 @@ CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category);
 CREATE INDEX IF NOT EXISTS idx_articles_author ON articles(author);
 CREATE INDEX IF NOT EXISTS idx_user_activities_user_id ON user_activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_activities_type ON user_activities(activity_type);
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_mountain_id ON bookings(mountain_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(booking_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -81,18 +110,23 @@ ALTER TABLE mountains ENABLE ROW LEVEL SECURITY;
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mountain_guides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users table
+DROP POLICY IF EXISTS "Users can view their own data" ON users;
 CREATE POLICY "Users can view their own data" ON users
     FOR SELECT USING (auth.uid()::text = id::text);
 
+DROP POLICY IF EXISTS "Users can update their own data" ON users;
 CREATE POLICY "Users can update their own data" ON users
     FOR UPDATE USING (auth.uid()::text = id::text);
 
 -- RLS Policies for mountains table (public read, admin write)
+DROP POLICY IF EXISTS "Mountains are viewable by everyone" ON mountains;
 CREATE POLICY "Mountains are viewable by everyone" ON mountains
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Only admins can insert mountains" ON mountains;
 CREATE POLICY "Only admins can insert mountains" ON mountains
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -102,6 +136,7 @@ CREATE POLICY "Only admins can insert mountains" ON mountains
         )
     );
 
+DROP POLICY IF EXISTS "Only admins can update mountains" ON mountains;
 CREATE POLICY "Only admins can update mountains" ON mountains
     FOR UPDATE USING (
         EXISTS (
@@ -111,6 +146,7 @@ CREATE POLICY "Only admins can update mountains" ON mountains
         )
     );
 
+DROP POLICY IF EXISTS "Only admins can delete mountains" ON mountains;
 CREATE POLICY "Only admins can delete mountains" ON mountains
     FOR DELETE USING (
         EXISTS (
@@ -121,9 +157,11 @@ CREATE POLICY "Only admins can delete mountains" ON mountains
     );
 
 -- RLS Policies for articles table
+DROP POLICY IF EXISTS "Published articles are viewable by everyone" ON articles;
 CREATE POLICY "Published articles are viewable by everyone" ON articles
     FOR SELECT USING (status = 'published');
 
+DROP POLICY IF EXISTS "Admins can view all articles" ON articles;
 CREATE POLICY "Admins can view all articles" ON articles
     FOR SELECT USING (
         EXISTS (
@@ -133,6 +171,7 @@ CREATE POLICY "Admins can view all articles" ON articles
         )
     );
 
+DROP POLICY IF EXISTS "Only admins can insert articles" ON articles;
 CREATE POLICY "Only admins can insert articles" ON articles
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -142,6 +181,7 @@ CREATE POLICY "Only admins can insert articles" ON articles
         )
     );
 
+DROP POLICY IF EXISTS "Only admins can update articles" ON articles;
 CREATE POLICY "Only admins can update articles" ON articles
     FOR UPDATE USING (
         EXISTS (
@@ -151,6 +191,7 @@ CREATE POLICY "Only admins can update articles" ON articles
         )
     );
 
+DROP POLICY IF EXISTS "Only admins can delete articles" ON articles;
 CREATE POLICY "Only admins can delete articles" ON articles
     FOR DELETE USING (
         EXISTS (
@@ -161,9 +202,11 @@ CREATE POLICY "Only admins can delete articles" ON articles
     );
 
 -- RLS Policies for mountain_guides table
+DROP POLICY IF EXISTS "Mountain guides are viewable by everyone" ON mountain_guides;
 CREATE POLICY "Mountain guides are viewable by everyone" ON mountain_guides
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Only admins can manage mountain guides" ON mountain_guides;
 CREATE POLICY "Only admins can manage mountain guides" ON mountain_guides
     FOR ALL USING (
         EXISTS (
@@ -174,11 +217,36 @@ CREATE POLICY "Only admins can manage mountain guides" ON mountain_guides
     );
 
 -- RLS Policies for user_activities table
+DROP POLICY IF EXISTS "Users can view their own activities" ON user_activities;
 CREATE POLICY "Users can view their own activities" ON user_activities
     FOR SELECT USING (user_id::text = auth.uid()::text);
 
+DROP POLICY IF EXISTS "Users can insert their own activities" ON user_activities;
 CREATE POLICY "Users can insert their own activities" ON user_activities
     FOR INSERT WITH CHECK (user_id::text = auth.uid()::text);
+
+-- RLS Policies for bookings table
+DROP POLICY IF EXISTS "Users can view their own bookings" ON bookings;
+CREATE POLICY "Users can view their own bookings" ON bookings
+    FOR SELECT USING (user_id::text = auth.uid()::text);
+
+DROP POLICY IF EXISTS "Users can create their own bookings" ON bookings;
+CREATE POLICY "Users can create their own bookings" ON bookings
+    FOR INSERT WITH CHECK (user_id::text = auth.uid()::text);
+
+DROP POLICY IF EXISTS "Users can update their own bookings" ON bookings;
+CREATE POLICY "Users can update their own bookings" ON bookings
+    FOR UPDATE USING (user_id::text = auth.uid()::text);
+
+DROP POLICY IF EXISTS "Admins can view all bookings" ON bookings;
+CREATE POLICY "Admins can view all bookings" ON bookings
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users 
+            WHERE users.id::text = auth.uid()::text 
+            AND users.role = 'admin'
+        )
+    );
 
 -- Insert sample data
 INSERT INTO users (username, email, password, role) VALUES 

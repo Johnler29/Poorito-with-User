@@ -1,0 +1,91 @@
+import React from 'react';
+
+function LandscapeView({ className = '' }) {
+  return (
+    <div className={`bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 rounded-xl shadow-lg overflow-hidden ${className}`}>
+      {/* Mountain Landscape Background */}
+      <div className="relative h-full min-h-[600px] flex items-end">
+        {/* Sky Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-200 via-blue-100 to-green-100"></div>
+        
+        {/* Mountain Silhouettes */}
+        <div className="absolute bottom-0 left-0 w-full h-3/4">
+          {/* Far Mountains */}
+          <div className="absolute bottom-0 left-0 w-full h-2/3">
+            <div className="absolute bottom-0 left-0 w-1/3 h-full bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-full transform -skew-x-12"></div>
+            <div className="absolute bottom-0 left-1/4 w-1/4 h-4/5 bg-gradient-to-t from-gray-500 to-gray-400 rounded-t-full transform -skew-x-6"></div>
+            <div className="absolute bottom-0 right-1/3 w-1/3 h-3/4 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-full transform skew-x-12"></div>
+            <div className="absolute bottom-0 right-0 w-1/4 h-5/6 bg-gradient-to-t from-gray-500 to-gray-400 rounded-t-full transform skew-x-6"></div>
+          </div>
+          
+          {/* Mid Mountains */}
+          <div className="absolute bottom-0 left-0 w-full h-4/5">
+            <div className="absolute bottom-0 left-1/6 w-1/4 h-full bg-gradient-to-t from-green-600 to-green-500 rounded-t-full transform -skew-x-8"></div>
+            <div className="absolute bottom-0 left-2/5 w-1/3 h-5/6 bg-gradient-to-t from-green-700 to-green-600 rounded-t-full transform -skew-x-4"></div>
+            <div className="absolute bottom-0 right-1/4 w-1/4 h-4/5 bg-gradient-to-t from-green-600 to-green-500 rounded-t-full transform skew-x-8"></div>
+          </div>
+          
+          {/* Near Mountains */}
+          <div className="absolute bottom-0 left-0 w-full h-full">
+            <div className="absolute bottom-0 left-0 w-1/3 h-full bg-gradient-to-t from-emerald-700 to-emerald-600 rounded-t-full transform -skew-x-6"></div>
+            <div className="absolute bottom-0 left-1/3 w-1/3 h-5/6 bg-gradient-to-t from-emerald-800 to-emerald-700 rounded-t-full transform -skew-x-2"></div>
+            <div className="absolute bottom-0 right-0 w-1/3 h-4/5 bg-gradient-to-t from-emerald-700 to-emerald-600 rounded-t-full transform skew-x-6"></div>
+          </div>
+        </div>
+        
+        {/* Trees and Vegetation */}
+        <div className="absolute bottom-0 left-0 w-full h-1/3">
+          {/* Tree silhouettes */}
+          <div className="absolute bottom-0 left-1/12 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-1/8 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-1/6 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-1/4 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-1/3 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-2/5 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-1/2 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-3/5 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-2/3 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-3/4 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 left-5/6 w-2 h-1/2 bg-green-800 rounded-t-full"></div>
+          <div className="absolute bottom-0 right-1/12 w-3 h-2/3 bg-green-800 rounded-t-full"></div>
+        </div>
+        
+        {/* Clouds */}
+        <div className="absolute top-1/4 left-1/4 w-16 h-8 bg-white/80 rounded-full transform -rotate-12"></div>
+        <div className="absolute top-1/3 right-1/3 w-20 h-10 bg-white/70 rounded-full transform rotate-6"></div>
+        <div className="absolute top-1/5 left-1/2 w-12 h-6 bg-white/90 rounded-full transform -rotate-6"></div>
+        <div className="absolute top-1/6 right-1/4 w-14 h-7 bg-white/75 rounded-full transform rotate-3"></div>
+        
+        {/* Sun */}
+        <div className="absolute top-1/6 right-1/6 w-12 h-12 bg-yellow-300 rounded-full shadow-lg"></div>
+        <div className="absolute top-1/6 right-1/6 w-12 h-12 bg-gradient-to-br from-yellow-200 to-orange-300 rounded-full"></div>
+        
+        {/* Overlay Text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white/95 drop-shadow-2xl">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Explore the Great Outdoors</h2>
+            <p className="text-lg md:text-xl lg:text-2xl opacity-95 mb-6">Discover amazing trails and breathtaking views</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3">
+                <span className="text-sm font-semibold">🏔️ Mountain Trails</span>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3">
+                <span className="text-sm font-semibold">🌲 Nature Walks</span>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-full px-6 py-3">
+                <span className="text-sm font-semibold">🌅 Scenic Views</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Floating Elements */}
+        <div className="absolute top-1/2 left-1/6 w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+        <div className="absolute top-2/3 right-1/5 w-1 h-1 bg-white/40 rounded-full animate-pulse delay-1000"></div>
+        <div className="absolute top-1/3 left-2/3 w-1.5 h-1.5 bg-white/50 rounded-full animate-pulse delay-2000"></div>
+      </div>
+    </div>
+  );
+}
+
+export default LandscapeView;

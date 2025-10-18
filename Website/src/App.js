@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
+import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/public/Home';
 import Explore from './pages/public/Explore';
@@ -9,6 +10,9 @@ import MountainDetail from './pages/public/MountainDetail';
 import Guides from './pages/public/Guides';
 import About from './pages/public/About';
 import Login from './pages/Login';
+import UserLogin from './pages/public/UserLogin';
+import Register from './pages/public/Register';
+import UserDashboard from './pages/public/UserDashboard';
 import Dashboard from './pages/Dashboard';
 import Mountains from './pages/Mountains';
 import MountainForm from './pages/MountainForm';
@@ -29,17 +33,23 @@ function App() {
           <Route path="/mountains" element={<Navigate to="/explore" replace />} />
           {/* Keep mountain detail page */}
           <Route path="/mountains/:id" element={<MountainDetail />} />
+          <Route path="/mountain/:id" element={<MountainDetail />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/about" element={<About />} />
         </Route>
 
-        {/* Login */}
-        <Route path="/login" element={<Login />} />
+        {/* User Authentication */}
+        <Route path="/login" element={<UserLogin />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
+        
+        {/* Admin Login */}
+        <Route path="/admin-login" element={<Login />} />
 
-        {/* Admin area - Protected */}
+        {/* Admin area - Protected with separate layout */}
         <Route path="/admin" element={
           <ProtectedRoute>
-            <Layout />
+            <AdminLayout />
           </ProtectedRoute>
         }>
           <Route index element={<Dashboard />} />

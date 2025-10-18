@@ -1,15 +1,38 @@
-import React from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import apiService from '../services/api';
 
 function PublicLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    apiService.logout();
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/');
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/" onClick={scrollToTop} className="flex items-center space-x-3">
             <img
               src="/poorito-logo.jpg"
               alt="Poorito"
@@ -26,14 +49,68 @@ function PublicLayout() {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className={`text-sm font-medium ${isActive('/') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Home</Link>
-            <Link to="/explore" className={`text-sm font-medium ${isActive('/explore') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Explore</Link>
-            <Link to="/guides" className={`text-sm font-medium ${isActive('/guides') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Guides</Link>
-            <Link to="/about" className={`text-sm font-medium ${isActive('/about') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>About</Link>
+            <Link to="/" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Home</Link>
+            <Link to="/explore" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/explore') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Explore</Link>
+            <Link to="/guides" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/guides') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Guides</Link>
+            <Link to="/about" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/about') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>About</Link>
           </nav>
 
           <div className="flex items-center space-x-3">
-            <Link to="/admin" className="text-xs md:text-sm font-semibold text-gray-600 hover:text-gray-900">Admin</Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-sm">
+                    {user.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="hidden md:block">{user.username}</span>
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">{user.username}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    <Link
+                      to="/dashboard"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        scrollToTop();
+                      }}
+                    >
+                      📊 Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100"
+                    >
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Link 
+                  to="/login" 
+                  onClick={scrollToTop}
+                  className="text-xs md:text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  to="/register" 
+                  onClick={scrollToTop}
+                  className="text-xs md:text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -57,6 +134,7 @@ function PublicLayout() {
               <a href="#" className="hover:text-gray-900">Privacy</a>
               <a href="#" className="hover:text-gray-900">Terms</a>
               <a href="#" className="hover:text-gray-900">Contact</a>
+              <Link to="/admin-login" className="hover:text-gray-900">Admin Portal</Link>
             </div>
           </div>
           <div className="text-center md:text-left text-sm text-gray-500">

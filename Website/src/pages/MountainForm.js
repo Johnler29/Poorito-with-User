@@ -20,6 +20,11 @@ function MountainForm() {
   const [hikeItinerary, setHikeItinerary] = useState([{ title: '', description: '', location: '', time: '' }]);
   const [transportationGuides, setTransportationGuides] = useState([{ header: '', title: '', description: '' }]);
   const [reminders] = useState([{ description: '' }]);
+  const [fees, setFees] = useState({
+    environmentalFee: '',
+    registrationFee: '',
+    guideCampingFee: ''
+  });
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState(null);
@@ -33,6 +38,8 @@ function MountainForm() {
         setLoadingData(true);
         const response = await apiService.getMountain(id);
         const mountain = response.mountain;
+        
+        console.log('Loaded mountain data:', mountain);
         
       if (mountain) {
         setFormData({
@@ -48,6 +55,63 @@ function MountainForm() {
         if (mountain.image_url) {
           setImages([mountain.image_url, null, null, null, null]);
         }
+
+        // Load existing mountain details
+        console.log('what_to_bring data:', mountain.what_to_bring);
+        if (mountain.what_to_bring && Array.isArray(mountain.what_to_bring)) {
+          const items = mountain.what_to_bring.map(item => item.item_name || '');
+          console.log('Setting things to bring:', items);
+          setThingsToBring(items.length > 0 ? items : ['']);
+        }
+
+        console.log('itinerary data:', mountain.itinerary);
+        if (mountain.itinerary && Array.isArray(mountain.itinerary)) {
+          const itineraryItems = mountain.itinerary.map(item => ({
+            title: item.item_name || '',
+            description: item.item_description || '',
+            location: '', // Not stored in current structure
+            time: item.item_time || ''
+          }));
+          console.log('Setting hike itinerary:', itineraryItems);
+          setHikeItinerary(itineraryItems.length > 0 ? itineraryItems : [{ title: '', description: '', location: '', time: '' }]);
+        }
+
+        console.log('how_to_get_there data:', mountain.how_to_get_there);
+        if (mountain.how_to_get_there && Array.isArray(mountain.how_to_get_there)) {
+          const transportItems = mountain.how_to_get_there.map(item => ({
+            header: item.item_transport_type === 'private' ? 'Private Transport' : 'Public Transport',
+            title: item.item_name || '',
+            description: item.item_description || ''
+          }));
+          console.log('Setting transportation guides:', transportItems);
+          setTransportationGuides(transportItems.length > 0 ? transportItems : [{ header: '', title: '', description: '' }]);
+        }
+
+        console.log('budgeting data:', mountain.budgeting);
+
+        // Load existing fee data
+        if (mountain.budgeting && Array.isArray(mountain.budgeting)) {
+          const feeData = {
+            environmentalFee: '',
+            registrationFee: '',
+            guideCampingFee: ''
+          };
+          
+          mountain.budgeting.forEach(item => {
+            if (item.item_name === 'Environmental Fee') {
+              feeData.environmentalFee = item.item_amount ? item.item_amount.toString() : '';
+            } else if (item.item_name === 'Registration Fee') {
+              feeData.registrationFee = item.item_amount ? item.item_amount.toString() : '';
+            } else if (item.item_name === 'Guide/Camping Fee') {
+              feeData.guideCampingFee = item.item_amount ? item.item_amount.toString() : '';
+            }
+          });
+          
+          console.log('Setting fees:', feeData);
+          setFees(feeData);
+        }
+        
+        console.log('✅ Mountain data loading completed for all sections');
       }
       } catch (err) {
         console.error('Error loading mountain:', err);
@@ -98,6 +162,13 @@ function MountainForm() {
     }));
   };
 
+  const handleFeeChange = (feeType, value) => {
+    setFees(prev => ({
+      ...prev,
+      [feeType]: value
+    }));
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -116,7 +187,6 @@ function MountainForm() {
         elevation: parseInt(formData.elevation),
         location: formData.location,
         difficulty: formData.difficulty,
-        status: formData.status,
         image_url: images[0] // Send the first image as the main image
       };
 
@@ -126,13 +196,19 @@ function MountainForm() {
         image_url: images[0] ? `${images[0].substring(0, 50)}...` : 'No image'
       });
 
+      let mountainId;
       if (isEdit) {
         await apiService.updateMountain(id, mountainData);
+        mountainId = id;
         alert('Mountain updated successfully!');
       } else {
-        await apiService.createMountain(mountainData);
+        const response = await apiService.createMountain(mountainData);
+        mountainId = response.mountain.id;
         alert('Mountain created successfully!');
       }
+
+      // Save mountain details
+      await saveMountainDetails(mountainId);
 
       navigate('/admin/mountains');
     } catch (err) {
@@ -140,6 +216,54 @@ function MountainForm() {
       setError('Failed to save mountain. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveMountainDetails = async (mountainId) => {
+    try {
+      // Prepare mountain details data for the new integrated system
+      const mountainDetails = {
+        what_to_bring: thingsToBring
+          .filter(item => item.trim() !== '')
+          .map((item, index) => ({
+            id: Date.now() + index, // Generate unique ID
+            item_name: item,
+            item_description: '',
+            item_icon: '📦', // Default icon
+            sort_order: index + 1
+          })),
+        budgeting: [
+          { id: Date.now() + 100, item_name: 'Environmental Fee', item_amount: parseFloat(fees.environmentalFee) || 0, item_unit: 'per person', sort_order: 1 },
+          { id: Date.now() + 101, item_name: 'Registration Fee', item_amount: parseFloat(fees.registrationFee) || 0, item_unit: 'per person', sort_order: 2 },
+          { id: Date.now() + 102, item_name: 'Guide/Camping Fee', item_amount: parseFloat(fees.guideCampingFee) || 0, item_unit: 'per person', sort_order: 3 }
+        ],
+        itinerary: hikeItinerary
+          .filter(item => item.title.trim() !== '')
+          .map((item, index) => ({
+            id: Date.now() + 200 + index,
+            item_name: item.title,
+            item_description: item.description,
+            item_time: item.time,
+            item_duration: '2-3 hours', // Default duration
+            sort_order: index + 1
+          })),
+        how_to_get_there: transportationGuides
+          .filter(item => item.header.trim() !== '')
+          .map((item, index) => ({
+            id: Date.now() + 300 + index,
+            item_name: item.title,
+            item_description: item.description,
+            item_transport_type: item.header.toLowerCase().includes('private') ? 'private' : 'public',
+            sort_order: index + 1
+          }))
+      };
+
+      // Update the mountain with the details using the main mountain update endpoint
+      await apiService.updateMountain(mountainId, mountainDetails);
+      console.log('Mountain details saved successfully');
+    } catch (err) {
+      console.error('Error saving mountain details:', err);
+      // Don't throw error here as the main mountain was saved successfully
     }
   };
 
@@ -321,18 +445,24 @@ function MountainForm() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-700">Fees</h3>
             <input 
-              type="text" 
+              type="number" 
               placeholder="Environmental Fee" 
+              value={fees.environmentalFee}
+              onChange={(e) => handleFeeChange('environmentalFee', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
             <input 
-              type="text" 
+              type="number" 
               placeholder="Registration Fee" 
+              value={fees.registrationFee}
+              onChange={(e) => handleFeeChange('registrationFee', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
             <input 
-              type="text" 
+              type="number" 
               placeholder="Guide/Camping Fee" 
+              value={fees.guideCampingFee}
+              onChange={(e) => handleFeeChange('guideCampingFee', e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
           </div>
@@ -345,22 +475,46 @@ function MountainForm() {
               <input 
                 type="text" 
                 placeholder="Title" 
+                value={item.title}
+                onChange={(e) => {
+                  const newItinerary = [...hikeItinerary];
+                  newItinerary[index].title = e.target.value;
+                  setHikeItinerary(newItinerary);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
               />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <input 
                   type="text" 
                   placeholder="Description" 
+                  value={item.description}
+                  onChange={(e) => {
+                    const newItinerary = [...hikeItinerary];
+                    newItinerary[index].description = e.target.value;
+                    setHikeItinerary(newItinerary);
+                  }}
                   className="md:col-span-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
                 />
                 <input 
                   type="text" 
                   placeholder="Location" 
+                  value={item.location}
+                  onChange={(e) => {
+                    const newItinerary = [...hikeItinerary];
+                    newItinerary[index].location = e.target.value;
+                    setHikeItinerary(newItinerary);
+                  }}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
                 />
                 <input 
                   type="text" 
                   placeholder="Time" 
+                  value={item.time}
+                  onChange={(e) => {
+                    const newItinerary = [...hikeItinerary];
+                    newItinerary[index].time = e.target.value;
+                    setHikeItinerary(newItinerary);
+                  }}
                   className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
                 />
               </div>
@@ -381,16 +535,34 @@ function MountainForm() {
               <input 
                 type="text" 
                 placeholder="Header" 
+                value={item.header}
+                onChange={(e) => {
+                  const newGuides = [...transportationGuides];
+                  newGuides[index].header = e.target.value;
+                  setTransportationGuides(newGuides);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
               />
               <input 
                 type="text" 
                 placeholder="Title" 
+                value={item.title}
+                onChange={(e) => {
+                  const newGuides = [...transportationGuides];
+                  newGuides[index].title = e.target.value;
+                  setTransportationGuides(newGuides);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all bg-white"
               />
               <textarea 
                 placeholder="Description" 
                 rows="3"
+                value={item.description}
+                onChange={(e) => {
+                  const newGuides = [...transportationGuides];
+                  newGuides[index].description = e.target.value;
+                  setTransportationGuides(newGuides);
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none bg-white"
               ></textarea>
             </div>

@@ -1,4 +1,6 @@
 import React from 'react';
+import WeatherWidget from '../../components/WeatherWidget';
+import LandscapeView from '../../components/LandscapeView';
 
 function Guides() {
   const sections = [
@@ -32,29 +34,54 @@ function Guides() {
         ))}
       </div>
 
-      <div className="mt-12 grid lg:grid-cols-2 gap-8">
-        <div className="bg-white border border-gray-100 rounded-xl p-6">
-          <h2 className="font-extrabold text-gray-900">Leave No Trace (LNT)</h2>
-          <ol className="mt-3 list-decimal pl-5 text-sm text-gray-700 space-y-1">
-            <li>Plan ahead and prepare</li>
-            <li>Travel and camp on durable surfaces</li>
-            <li>Dispose of waste properly</li>
-            <li>Leave what you find</li>
-            <li>Minimize campfire impacts</li>
-            <li>Respect wildlife</li>
-            <li>Be considerate of others</li>
-          </ol>
+      <div className="mt-12 grid lg:grid-cols-4 gap-8">
+        {/* Landscape View - Takes up 3/4 of the space */}
+        <div className="lg:col-span-3">
+          <LandscapeView className="h-full min-h-[600px] w-full" />
         </div>
-        <aside className="rounded-2xl border border-gray-100 bg-gradient-to-br from-primary to-primary-dark text-white p-6">
-          <h3 className="font-bold">Weather & alerts</h3>
-          <p className="text-sm mt-2 opacity-90">Connect a weather API to show live conditions by trail.</p>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div className="bg-white/10 rounded-lg p-3"><div className="opacity-80">Temp</div><div className="font-semibold">—°C</div></div>
-            <div className="bg-white/10 rounded-lg p-3"><div className="opacity-80">Wind</div><div className="font-semibold">— km/h</div></div>
-            <div className="bg-white/10 rounded-lg p-3"><div className="opacity-80">Rain</div><div className="font-semibold">—%</div></div>
-            <div className="bg-white/10 rounded-lg p-3"><div className="opacity-80">Advisory</div><div className="font-semibold">None</div></div>
+        
+        {/* Weather Widget - Takes up 1/4 of the space */}
+        <div className="lg:col-span-1">
+          <WeatherWidget 
+            city="Davao" 
+            country="PH" 
+            showForecast={true}
+            className="h-full"
+          />
+        </div>
+      </div>
+      
+      {/* Leave No Trace section moved below */}
+      <div className="mt-12">
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <h2 className="font-extrabold text-gray-900 mb-4">Leave No Trace (LNT)</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Plan Ahead & Prepare</h3>
+              <p className="text-sm text-gray-600">Research your route, check weather conditions, and pack appropriately for your adventure.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Travel & Camp on Durable Surfaces</h3>
+              <p className="text-sm text-gray-600">Stay on established trails and camp in designated areas to minimize environmental impact.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Dispose of Waste Properly</h3>
+              <p className="text-sm text-gray-600">Pack out all trash, including food scraps and hygiene products. Leave no trace behind.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Leave What You Find</h3>
+              <p className="text-sm text-gray-600">Preserve the natural environment by not taking rocks, plants, or other natural objects.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Minimize Campfire Impacts</h3>
+              <p className="text-sm text-gray-600">Use a camp stove for cooking and only build fires in designated fire rings when permitted.</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-2">Respect Wildlife</h3>
+              <p className="text-sm text-gray-600">Observe wildlife from a distance and never feed animals. Store food securely.</p>
+            </div>
           </div>
-        </aside>
+        </div>
       </div>
     </div>
   );

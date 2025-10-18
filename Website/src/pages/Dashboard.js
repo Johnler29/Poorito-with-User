@@ -83,11 +83,11 @@ function Dashboard() {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">Dashboard</h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Dashboard</h1>
           <p className="text-orange-600 font-semibold text-lg flex items-center gap-2">
             <span>📅</span>
             {currentDate}
@@ -96,14 +96,14 @@ function Dashboard() {
         <div className="flex flex-wrap gap-3">
           <button 
             onClick={() => navigate('/')}
-            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2 text-sm font-medium"
           >
             <span>🌐</span>
             View Public Site
           </button>
           <button 
             onClick={fetchAnalytics}
-            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
           >
             Refresh Data
           </button>
@@ -112,55 +112,55 @@ function Dashboard() {
 
       {/* Overview Stats */}
       <div>
-        <div className="mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Overview</h2>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Overview</h2>
           <p className="text-gray-500">Quick glance at your content statistics</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Mountains Card */}
-          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border border-gray-200 hover:border-orange-500">
-            <div className="flex items-center justify-between mb-6">
+          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-200 hover:border-orange-500">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Mountains</h3>
-              <div className="text-3xl opacity-40">⛰️</div>
+              <div className="text-2xl opacity-40">⛰️</div>
             </div>
-            <div className="text-5xl font-bold text-gray-900 mb-2">
+            <div className="text-4xl font-bold text-gray-900 mb-2">
               {analytics?.totals?.mountains || 0}
             </div>
             <p className="text-sm text-gray-500">Mountains listed</p>
           </div>
 
           {/* Articles Card */}
-          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border border-gray-200 hover:border-orange-500">
-            <div className="flex items-center justify-between mb-6">
+          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-200 hover:border-orange-500">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Articles</h3>
-              <div className="text-3xl opacity-40">📖</div>
+              <div className="text-2xl opacity-40">📖</div>
             </div>
-            <div className="text-5xl font-bold text-gray-900 mb-2">
+            <div className="text-4xl font-bold text-gray-900 mb-2">
               {analytics?.totals?.articles || 0}
             </div>
             <p className="text-sm text-gray-500">Articles published</p>
           </div>
 
           {/* Drafts Card */}
-          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border border-gray-200 hover:border-orange-500">
-            <div className="flex items-center justify-between mb-6">
+          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-200 hover:border-orange-500">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Drafts</h3>
-              <div className="text-3xl opacity-40">📝</div>
+              <div className="text-2xl opacity-40">📝</div>
             </div>
-            <div className="text-5xl font-bold text-gray-900 mb-2">
+            <div className="text-4xl font-bold text-gray-900 mb-2">
               {analytics?.totals?.drafts || 0}
             </div>
             <p className="text-sm text-gray-500">Draft articles</p>
           </div>
 
           {/* Users Card */}
-          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-8 border border-gray-200 hover:border-orange-500">
-            <div className="flex items-center justify-between mb-6">
+          <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 p-6 border border-gray-200 hover:border-orange-500">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Users</h3>
-              <div className="text-3xl opacity-40">👥</div>
+              <div className="text-2xl opacity-40">👥</div>
             </div>
-            <div className="text-5xl font-bold text-gray-900 mb-2">
+            <div className="text-4xl font-bold text-gray-900 mb-2">
               {analytics?.totals?.users || 0}
             </div>
             <p className="text-sm text-gray-500">Registered users</p>
@@ -171,12 +171,12 @@ function Dashboard() {
       {/* Recent Activity */}
       {analytics?.recentActivity && (
         <div>
-          <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Recent Activity</h2>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Recent Activity</h2>
             <p className="text-gray-500">Latest updates and changes</p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Recent Mountains */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Mountains</h3>

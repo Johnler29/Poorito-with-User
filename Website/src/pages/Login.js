@@ -70,8 +70,8 @@ function Login() {
               }}
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
-          <p className="text-gray-600">Sign in to access the dashboard</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Portal</h1>
+          <p className="text-gray-600">Sign in to access the admin dashboard</p>
         </div>
 
         {/* Login Form */}
@@ -140,7 +140,7 @@ function Login() {
 
           {/* Demo Credentials Info */}
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center mb-2">Demo Credentials:</p>
+            <p className="text-sm text-gray-600 text-center mb-2">Admin Credentials:</p>
             <div className="bg-gray-50 rounded-lg p-3 text-sm">
               <p className="text-gray-700 mb-1">
                 <span className="font-semibold">Email:</span> admin@poorito.com
@@ -149,6 +149,16 @@ function Login() {
                 <span className="font-semibold">Password:</span> password
               </p>
             </div>
+          </div>
+
+          {/* Link to Public Site */}
+          <div className="mt-4 text-center">
+            <a 
+              href="/" 
+              className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            >
+              ← Back to Public Site
+            </a>
           </div>
         </div>
 

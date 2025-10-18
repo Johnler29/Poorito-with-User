@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import apiService from '../../services/api';
 
 // Mountain Card Component
@@ -168,6 +168,7 @@ const MountainCard = ({ mountain, viewMode, onExplore }) => {
 
 function Explore() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [cityQuery, setCityQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
   const [sortBy, setSortBy] = useState('name');
@@ -179,6 +180,13 @@ function Explore() {
   useEffect(() => {
     fetchMountains();
   }, []);
+
+  // Handle search query from navigation state
+  useEffect(() => {
+    if (location.state?.searchQuery) {
+      setCityQuery(location.state.searchQuery);
+    }
+  }, [location.state]);
 
   const fetchMountains = async () => {
     try {

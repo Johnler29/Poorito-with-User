@@ -40,13 +40,17 @@ class ApiService {
     };
 
     try {
+      console.log(`API Request: ${options.method || 'GET'} ${url}`);
       const response = await fetch(url, config);
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        const errorMessage = data.error || `HTTP error! status: ${response.status}`;
+        console.error(`API Error: ${response.status} - ${errorMessage}`);
+        throw new Error(errorMessage);
       }
 
+      console.log(`API Success: ${options.method || 'GET'} ${url}`);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
@@ -163,6 +167,89 @@ class ApiService {
 
   async getUserAnalytics() {
     return this.request('/analytics/users');
+  }
+
+  // Booking endpoints
+  async getMyBookings() {
+    return this.request('/bookings/my-bookings');
+  }
+
+  async createBooking(mountainId, bookingDate) {
+    return this.request('/bookings', {
+      method: 'POST',
+      body: JSON.stringify({ mountain_id: mountainId, booking_date: bookingDate }),
+    });
+  }
+
+  async cancelBooking(bookingId) {
+    return this.request(`/bookings/${bookingId}/cancel`, {
+      method: 'PUT',
+    });
+  }
+
+  async getBooking(bookingId) {
+    return this.request(`/bookings/${bookingId}`);
+  }
+
+  // Weather endpoints
+  async getCurrentWeatherByCoords(lat, lon) {
+    return this.request(`/weather/current/${lat}/${lon}`);
+  }
+
+  async getCurrentWeatherByCity(city, country = null) {
+    const endpoint = country ? `/weather/current/city/${city}?country=${country}` : `/weather/current/city/${city}`;
+    return this.request(endpoint);
+  }
+
+  async getWeatherForecast(lat, lon) {
+    return this.request(`/weather/forecast/${lat}/${lon}`);
+  }
+
+  async getWeatherAlerts(lat, lon) {
+    return this.request(`/weather/alerts/${lat}/${lon}`);
+  }
+
+  // Mountain details endpoints
+  async getMountainDetails(mountainId) {
+    return this.request(`/mountains/${mountainId}/details`);
+  }
+
+  async getAllMountainDetails() {
+    // Fetch all mountains with their details
+    return this.request('/mountains');
+  }
+
+  async createMountainDetail(detailData) {
+    // Use new endpoint: POST /mountains/:mountainId/details/:sectionType
+    const { mountain_id, section_type, ...itemData } = detailData;
+    return this.request(`/mountains/${mountain_id}/details/${section_type}`, {
+      method: 'POST',
+      body: JSON.stringify(itemData),
+    });
+  }
+
+  async updateMountainDetail(detailId, detailData) {
+    // Extract the necessary data
+    const { mountain_id, section_type, ...itemData } = detailData;
+    // Use new endpoint: PUT /mountains/:mountainId/details/:sectionType/:itemId
+    return this.request(`/mountains/${mountain_id}/details/${section_type}/${detailId}`, {
+      method: 'PUT',
+      body: JSON.stringify(itemData),
+    });
+  }
+
+  async deleteMountainDetail(mountainId, sectionType, itemId) {
+    // Use new endpoint: DELETE /mountains/:mountainId/details/:sectionType/:itemId
+    return this.request(`/mountains/${mountainId}/details/${sectionType}/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async bulkUpdateMountainDetails(mountainId, detailsData) {
+    return this.request(`/mountains/${mountainId}/details`, {
+      method: 'PUT',
+      body: JSON.stringify(detailsData),
+    });
   }
 
   // Health check
