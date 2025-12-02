@@ -24,8 +24,11 @@ class ApiService {
       'Content-Type': 'application/json',
     };
     
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    // Always get the latest token from localStorage to handle token updates
+    const token = localStorage.getItem('authToken') || this.token;
+    
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
     
     return headers;
@@ -34,6 +37,13 @@ class ApiService {
   // Generic request method
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    
+    // Always get the latest token from localStorage
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.token = token;
+    }
+    
     const config = {
       headers: this.getHeaders(),
       ...options,
@@ -45,6 +55,21 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle token expiration - clear token and redirect to login
+        if (response.status === 403 && data.error && data.error.includes('token')) {
+          console.warn('Token expired or invalid, clearing authentication');
+          this.clearToken();
+          localStorage.removeItem('user');
+          
+          // Only redirect if we're not already on login/register pages
+          if (!window.location.pathname.includes('/login') && 
+              !window.location.pathname.includes('/register')) {
+            // Store the current path to redirect back after login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = '/login';
+          }
+        }
+        
         const errorMessage = data.error || `HTTP error! status: ${response.status}`;
         console.error(`API Error: ${response.status} - ${errorMessage}`);
         throw new Error(errorMessage);
@@ -80,6 +105,20 @@ class ApiService {
   async logout() {
     this.clearToken();
     return this.request('/auth/logout', { method: 'POST' });
+  }
+
+  async forgotPassword(email) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token, newPassword) {
+    return this.request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password: newPassword }),
+    });
   }
 
   // Mountains endpoints
@@ -189,6 +228,10 @@ class ApiService {
 
   async getBooking(bookingId) {
     return this.request(`/bookings/${bookingId}`);
+  }
+
+  async getBookingReceipt(bookingId) {
+    return this.request(`/bookings/${bookingId}/receipt`);
   }
 
   // Weather endpoints

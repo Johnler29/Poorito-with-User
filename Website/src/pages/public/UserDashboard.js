@@ -241,6 +241,12 @@ function UserDashboard() {
                       </div>
 
                       <div className="flex flex-col space-y-2">
+                        <button
+                          onClick={() => navigate(`/receipt/${booking.id}`)}
+                          className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                        >
+                          📄 View Receipt
+                        </button>
                         {booking.status === 'confirmed' && (
                           <button
                             onClick={() => handleCancelBooking(booking.id)}

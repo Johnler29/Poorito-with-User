@@ -28,13 +28,28 @@ function MountainDetail() {
   useEffect(() => {
     fetchMountain();
     fetchMountainDetails();
-    checkUser();
+    checkUser().catch(err => console.error('Error checking user:', err));
   }, [id]);
 
-  const checkUser = () => {
+  const checkUser = async () => {
     const userData = localStorage.getItem('user');
-    if (userData) {
+    const token = localStorage.getItem('authToken');
+    
+    if (userData && token) {
       setUser(JSON.parse(userData));
+      
+      // Verify token is still valid by checking current user
+      try {
+        await apiService.getCurrentUser();
+      } catch (err) {
+        // Token is invalid, clear user data
+        console.warn('Token validation failed, clearing user data');
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        setUser(null);
+      }
+    } else {
+      setUser(null);
     }
   };
 
@@ -149,6 +164,19 @@ function MountainDetail() {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if user is logged in
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('user');
+    
+    if (!token || !userData) {
+      setBookingError('Please log in to make a booking');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      return;
+    }
+    
     if (!bookingDate) {
       setBookingError('Please select a date');
       return;
@@ -167,12 +195,37 @@ function MountainDetail() {
     setBookingError('');
 
     try {
+      // Verify token is still valid before booking
+      try {
+        await apiService.getCurrentUser();
+      } catch (authErr) {
+        // Token expired, redirect to login
+        setBookingError('Your session has expired. Please log in again.');
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+        return;
+      }
+      
       await apiService.createBooking(mountain.id, bookingDate);
       setShowBookingModal(false);
       alert('Booking confirmed! Check your dashboard for details.');
     } catch (err) {
       console.error('Booking error:', err);
       setBookingError(err.message || 'Failed to create booking');
+      
+      // If token error, clear auth and redirect
+      if (err.message && err.message.includes('token')) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
     } finally {
       setBookingLoading(false);
     }

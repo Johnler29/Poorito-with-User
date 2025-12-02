@@ -99,9 +99,17 @@ function UserLogin() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+                  Password
+                </label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <input
                 type="password"
                 id="password"

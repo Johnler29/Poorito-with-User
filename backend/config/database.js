@@ -7,6 +7,17 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   || process.env.SUPABASE_ANON_KEY 
   || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkbnprbWFqbWVybHZ1d3B0bnRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1NDcwNTUsImV4cCI6MjA3NTEyMzA1NX0.LPnXAC8K-dZcERJgmq2Fq42x4EtL_n8920FB0fbbES4';
 
+// Log which key is being used (for debugging)
+if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.log('✅ Using SUPABASE_SERVICE_ROLE_KEY (bypasses RLS)');
+} else if (process.env.SUPABASE_ANON_KEY) {
+  console.log('⚠️  Using SUPABASE_ANON_KEY (respects RLS policies)');
+  console.log('💡 Tip: Set SUPABASE_SERVICE_ROLE_KEY in .env to bypass RLS');
+} else {
+  console.log('⚠️  Using fallback anon key (respects RLS policies)');
+  console.log('💡 Tip: Set SUPABASE_SERVICE_ROLE_KEY in .env to bypass RLS');
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Test connection

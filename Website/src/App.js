@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
 import PublicLayout from './components/PublicLayout';
 import AdminLayout from './components/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -12,7 +11,10 @@ import About from './pages/public/About';
 import Login from './pages/Login';
 import UserLogin from './pages/public/UserLogin';
 import Register from './pages/public/Register';
+import ForgotPassword from './pages/public/ForgotPassword';
+import ResetPassword from './pages/public/ResetPassword';
 import UserDashboard from './pages/public/UserDashboard';
+import Receipt from './pages/public/Receipt';
 import Dashboard from './pages/Dashboard';
 import Mountains from './pages/Mountains';
 import MountainForm from './pages/MountainForm';
@@ -41,7 +43,10 @@ function App() {
         {/* User Authentication */}
         <Route path="/login" element={<UserLogin />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/receipt/:id" element={<Receipt />} />
         
         {/* Admin Login */}
         <Route path="/admin-login" element={<Login />} />
