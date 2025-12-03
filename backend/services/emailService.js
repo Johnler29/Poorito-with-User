@@ -57,6 +57,10 @@ const sendBookingConfirmation = async (userEmail, userName, bookingData, mountai
       hour12: true
     });
 
+    // Format number of participants
+    const numberOfParticipants = bookingData.number_of_participants ? parseInt(bookingData.number_of_participants) : 1;
+    const participantsText = `${numberOfParticipants} ${numberOfParticipants === 1 ? 'person' : 'people'}`;
+
     // Email content
     const mailOptions = {
       from: `"Poorito Team" <${process.env.SMTP_USER}>`,
@@ -400,6 +404,10 @@ const sendBookingConfirmation = async (userEmail, userName, bookingData, mountai
                   <span class="info-label">Status</span>
                   <span class="info-value"><span class="status-badge">${bookingData.status.toUpperCase()}</span></span>
                 </div>
+                <div class="info-row">
+                  <span class="info-label">Number of Participants (Pax)</span>
+                  <span class="info-value">${participantsText}</span>
+                </div>
               </div>
               
               <!-- Mountain Information Card -->
@@ -428,6 +436,10 @@ const sendBookingConfirmation = async (userEmail, userName, bookingData, mountai
                     <span class="mountain-detail-value">${mountainData.elevation}m</span>
                   </div>
                   ` : ''}
+                  <div class="mountain-detail-item">
+                    <span class="mountain-detail-label">Pax</span>
+                    <span class="mountain-detail-value">${participantsText}</span>
+                  </div>
                 </div>
               </div>
               
@@ -474,12 +486,13 @@ const sendBookingConfirmation = async (userEmail, userName, bookingData, mountai
         Booking ID: POOR-${String(bookingData.id).padStart(6, '0')}
         Booking Date: ${formattedDate}
         Status: ${bookingData.status.toUpperCase()}
+        Number of Participants (Pax): ${participantsText}
         
         MOUNTAIN INFORMATION
         ──────────────────────────────────────
         Name: ${mountainData.name}
-        ${mountainData.location ? `Location: ${mountainData.location}\n` : ''}${mountainData.difficulty ? `Difficulty: ${mountainData.difficulty}\n` : ''}${mountainData.elevation ? `Elevation: ${mountainData.elevation}m\n` : ''}
-        
+        ${mountainData.location ? `Location: ${mountainData.location}\n` : ''}${mountainData.difficulty ? `Difficulty: ${mountainData.difficulty}\n` : ''}${mountainData.elevation ? `Elevation: ${mountainData.elevation}m\n` : ''}Pax: ${participantsText}
+
         We're excited to be part of your journey! If you have any questions, need to make changes to your booking, or want to prepare for your adventure, feel free to reach out to us.
         
         View your bookings: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard

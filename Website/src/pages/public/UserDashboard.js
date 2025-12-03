@@ -8,6 +8,9 @@ function UserDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -44,18 +47,30 @@ function UserDashboard() {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) {
-      return;
-    }
+  const openCancelModal = (booking) => {
+    setBookingToCancel(booking);
+    setShowCancelModal(true);
+  };
+
+  const closeCancelModal = () => {
+    if (cancelLoading) return;
+    setShowCancelModal(false);
+    setBookingToCancel(null);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!bookingToCancel) return;
 
     try {
-      await apiService.cancelBooking(bookingId);
-      // Refresh bookings
+      setCancelLoading(true);
+      await apiService.cancelBooking(bookingToCancel.id);
       await fetchBookings();
+      closeCancelModal();
     } catch (err) {
       console.error('Error cancelling booking:', err);
-      alert('Failed to cancel booking. Please try again.');
+      setError('Failed to cancel booking. Please try again.');
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -236,6 +251,9 @@ function UserDashboard() {
                         
                         <div className="text-sm text-gray-600">
                           <p><strong>Booking Date:</strong> {formatDate(booking.booking_date)}</p>
+                          {booking.number_of_participants && (
+                            <p><strong>Participants:</strong> {booking.number_of_participants} {booking.number_of_participants === 1 ? 'person' : 'people'}</p>
+                          )}
                           <p><strong>Booked On:</strong> {formatDate(booking.created_at)}</p>
                         </div>
                       </div>
@@ -249,7 +267,7 @@ function UserDashboard() {
                         </button>
                         {booking.status === 'confirmed' && (
                           <button
-                            onClick={() => handleCancelBooking(booking.id)}
+                            onClick={() => openCancelModal(booking)}
                             className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
                           >
                             Cancel Booking
@@ -269,6 +287,65 @@ function UserDashboard() {
             )}
           </div>
         </div>
+
+        {/* Cancel Booking Modal */}
+        {showCancelModal && bookingToCancel && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Cancel booking?</h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    This will free up your slot on this trail and cannot be undone.
+                  </p>
+                </div>
+                <button
+                  onClick={closeCancelModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="mb-6 rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700">
+                <p className="font-semibold text-gray-900 mb-1">
+                  {bookingToCancel.mountains?.name || 'Selected trail'}
+                </p>
+                <p>
+                  <span className="font-medium">Booking Date:</span>{' '}
+                  {formatDate(bookingToCancel.booking_date)}
+                </p>
+                {bookingToCancel.number_of_participants && (
+                  <p className="mt-1">
+                    <span className="font-medium">Participants:</span>{' '}
+                    {bookingToCancel.number_of_participants}{' '}
+                    {bookingToCancel.number_of_participants === 1 ? 'person' : 'people'}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={closeCancelModal}
+                  disabled={cancelLoading}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Keep Booking
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmCancel}
+                  disabled={cancelLoading}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60"
+                >
+                  {cancelLoading ? 'Cancelling...' : 'Yes, Cancel Booking'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

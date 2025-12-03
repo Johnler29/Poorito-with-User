@@ -7,15 +7,15 @@ const MountainCard = ({ mountain, viewMode, onExplore }) => {
   const getDifficultyColor = (difficulty) => {
     switch (difficulty?.toLowerCase()) {
       case 'easy':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-500/90 text-white border-green-400';
       case 'moderate':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-yellow-500/90 text-white border-yellow-400';
       case 'hard':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-orange-500/90 text-white border-orange-400';
       case 'expert':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-500/90 text-white border-red-400';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-500/90 text-white border-gray-400';
     }
   };
 
@@ -51,9 +51,10 @@ const MountainCard = ({ mountain, viewMode, onExplore }) => {
                 <span className="text-white text-7xl opacity-50">⛰️</span>
               </div>
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 group-hover:from-black/30 transition-all" />
             <div className="absolute top-4 left-4">
-              <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${getDifficultyColor(mountain.difficulty)}`}>
-                {getDifficultyIcon(mountain.difficulty)} {mountain.difficulty}
+              <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm shadow-md ${getDifficultyColor(mountain.difficulty)}`}>
+                {mountain.difficulty}
               </span>
             </div>
           </div>
@@ -81,9 +82,16 @@ const MountainCard = ({ mountain, viewMode, onExplore }) => {
                     </div>
                   </div>
                   <div className="flex items-start text-sm">
-                    <span className="w-7 h-7 flex items-center justify-center mr-2 text-xl flex-shrink-0">{getDifficultyIcon(mountain.difficulty)}</span>
+                    <div className={`w-7 h-7 flex items-center justify-center mr-2 rounded-lg flex-shrink-0 ${getDifficultyColor(mountain.difficulty)}`}>
+                      <span className="text-xs font-bold">{getDifficultyIcon(mountain.difficulty)}</span>
+                    </div>
                     <div className="flex-1">
-                      <div className={`font-semibold ${getDifficultyColor(mountain.difficulty).split(' ')[1]}`}>
+                      <div className={`font-semibold ${
+                        mountain.difficulty === 'Easy' ? 'text-green-600' :
+                        mountain.difficulty === 'Moderate' ? 'text-yellow-600' :
+                        mountain.difficulty === 'Hard' ? 'text-orange-600' :
+                        'text-red-600'
+                      }`}>
                         {mountain.difficulty}
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">Difficulty</div>
@@ -134,8 +142,8 @@ const MountainCard = ({ mountain, viewMode, onExplore }) => {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 group-hover:from-black/30 transition-all" />
         <div className="absolute top-4 right-4">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${getDifficultyColor(mountain.difficulty)}`}>
-            {getDifficultyIcon(mountain.difficulty)} {mountain.difficulty}
+          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm shadow-md ${getDifficultyColor(mountain.difficulty)}`}>
+            {mountain.difficulty}
           </span>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
@@ -250,78 +258,102 @@ function Explore() {
               <p className="text-lg text-gray-600">Discover amazing mountains and plan your next adventure with detailed information.</p>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 shadow-sm">
-                <span className="text-2xl">⛰️</span>
+              <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-xl">
+                  ⛰️
+                </div>
                 <div className="text-sm">
-                  <span className="font-bold text-gray-900 text-lg">{filtered.length}</span>
-                  <span className="text-gray-500"> / {mountains.length} trails</span>
+                  <div className="font-bold text-gray-900 text-xl">{filtered.length}</div>
+                  <div className="text-gray-500 text-xs">of {mountains.length} trails</div>
                 </div>
               </div>
-              <div className="flex gap-2 bg-white rounded-lg border border-gray-200 p-1 shadow-sm">
+              <div className="flex gap-2 bg-white rounded-xl border border-gray-200 p-1.5 shadow-md">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                  className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-orange-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
                   title="Grid view"
                 >
-                  <span className="text-lg">⚏</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+                  className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-orange-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}
                   title="List view"
                 >
-                  <span className="text-lg">☰</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
 
           {/* Filters and Search */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 lg:p-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 lg:p-8 hover:shadow-xl transition-shadow">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
               {/* Search */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Search Trails</label>
                 <div className="relative">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                   <input 
                     value={cityQuery} 
                     onChange={(e)=>setCityQuery(e.target.value)} 
                     className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 pl-11 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-gray-300" 
                     placeholder="Search by name, location, or description..." 
                   />
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">🔍</span>
                 </div>
               </div>
 
               {/* Difficulty Filter */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Difficulty</label>
-                <select
-                  value={difficultyFilter}
-                  onChange={(e) => setDifficultyFilter(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-gray-300 cursor-pointer"
-                >
-                  <option value="All">All Difficulties</option>
-                  <option value="Easy">🟢 Easy</option>
-                  <option value="Moderate">🟡 Moderate</option>
-                  <option value="Hard">🟠 Hard</option>
-                  <option value="Expert">🔴 Expert</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={difficultyFilter}
+                    onChange={(e) => setDifficultyFilter(e.target.value)}
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-gray-300 cursor-pointer appearance-none bg-white"
+                  >
+                    <option value="All">All Difficulties</option>
+                    <option value="Easy">🟢 Easy</option>
+                    <option value="Moderate">🟡 Moderate</option>
+                    <option value="Hard">🟠 Hard</option>
+                    <option value="Expert">🔴 Expert</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Sort */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Sort By</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-gray-300 cursor-pointer"
-                >
-                  <option value="name">📝 Name (A-Z)</option>
-                  <option value="elevation">📏 Elevation (High to Low)</option>
-                  <option value="difficulty">⚠️ Difficulty (Easy to Hard)</option>
-                  <option value="location">📍 Location (A-Z)</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-sm hover:border-gray-300 cursor-pointer appearance-none bg-white"
+                  >
+                    <option value="name">📝 Name (A-Z)</option>
+                    <option value="elevation">📏 Elevation (High to Low)</option>
+                    <option value="difficulty">⚠️ Difficulty (Easy to Hard)</option>
+                    <option value="location">📍 Location (A-Z)</option>
+                  </select>
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

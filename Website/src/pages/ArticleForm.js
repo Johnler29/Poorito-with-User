@@ -106,13 +106,17 @@ function ArticleForm() {
 
       if (isEdit) {
         await apiService.updateArticle(id, articleData);
-        alert('Article updated successfully!');
       } else {
         await apiService.createArticle(articleData);
-        alert('Article created successfully!');
       }
 
-      navigate('/admin/articles-guides');
+      navigate('/admin/articles-guides', {
+        state: {
+          success: isEdit
+            ? 'Article updated successfully!'
+            : 'Article created successfully!'
+        }
+      });
     } catch (err) {
       console.error('Error saving article:', err);
       setError('Failed to save article. Please try again.');

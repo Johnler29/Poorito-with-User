@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../../services/api';
-import WeatherWidget from '../../components/WeatherWidget';
 
 function MountainDetail() {
   const { id } = useParams();
@@ -12,8 +11,10 @@ function MountainDetail() {
   const [user, setUser] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingDate, setBookingDate] = useState('');
+  const [numberOfParticipants, setNumberOfParticipants] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState('');
+  const [bookingSuccess, setBookingSuccess] = useState('');
   const [mountainDetails, setMountainDetails] = useState({ 
     what_to_bring: [], 
     budgeting: [], 
@@ -92,7 +93,9 @@ function MountainDetail() {
     }
     setShowBookingModal(true);
     setBookingDate('');
+    setNumberOfParticipants(1);
     setBookingError('');
+    setBookingSuccess('');
   };
 
   const handleShareTrail = () => {
@@ -182,6 +185,11 @@ function MountainDetail() {
       return;
     }
 
+    if (!numberOfParticipants || numberOfParticipants < 1 || numberOfParticipants > 20) {
+      setBookingError('Please enter a valid number of participants (1-20)');
+      return;
+    }
+
     const selectedDate = new Date(bookingDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -210,9 +218,13 @@ function MountainDetail() {
         return;
       }
       
-      await apiService.createBooking(mountain.id, bookingDate);
-      setShowBookingModal(false);
-      alert('Booking confirmed! Check your dashboard for details.');
+      await apiService.createBooking(mountain.id, bookingDate, numberOfParticipants);
+      setBookingSuccess('Booking confirmed! You can view and manage this trip from your dashboard.');
+      // Optionally close the modal after a short delay
+      setTimeout(() => {
+        setShowBookingModal(false);
+        setBookingSuccess('');
+      }, 2000);
     } catch (err) {
       console.error('Booking error:', err);
       setBookingError(err.message || 'Failed to create booking');
@@ -379,16 +391,6 @@ function MountainDetail() {
           </div>
         </div>
 
-        {/* Weather Widget - Landscape Layout */}
-        <div className="mb-12">
-          <WeatherWidget 
-            city={mountain.location.split(',')[0].trim()} // Extract city name from location
-            country="PH" // Philippines
-            showForecast={true}
-            landscape={true}
-            className="w-full"
-          />
-        </div>
 
         {/* Navigation Tabs */}
         <div className="mb-8">
@@ -621,32 +623,63 @@ function MountainDetail() {
 
           {/* Reminders Section */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Reminders</h2>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="flex items-center justify-between gap-4 mb-6">
               <div>
-                <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-gray-900">Trail Reminders</h2>
+                <p className="text-sm text-gray-500">
+                  Quick checks before you head out to {mountain.name}.
+                </p>
+              </div>
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-200 text-xs font-medium text-green-700">
+                <span>✓</span>
+                <span>Pack smart, hike safe</span>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 items-stretch">
+              {/* Checklist */}
+              <div className="bg-gradient-to-b from-gray-50 to-white rounded-xl p-5 border border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-800 mb-4 uppercase tracking-wide">
+                  Essentials Checklist
+                </h3>
+                <div className="space-y-3">
                   {[
-                    "Travel earlier if commuting (by van, bus, and tricycle, allow more buffer time)",
-                    "Wear proper hiking shoes; some parts of the trail are steep and rocky",
-                    "Bring enough water, trail snacks, and a packed lunch",
-                    "Guide fee is usually ₱750 for a group of 5 (mandatory)",
-                    "Environmental + registration fee is around ₱100-₱120 total per person",
-                    "Optional: Bring swimwear and dry bag for river activities"
+                    "Travel earlier if commuting (by van, bus, and tricycle, allow more buffer time).",
+                    "Wear proper hiking shoes; some parts of the trail are steep and rocky.",
+                    "Bring enough water, trail snacks, and a packed lunch.",
+                    "Guide fee is usually ₱750 for a group of 5 (mandatory).",
+                    "Environmental + registration fee is around ₱100-₱120 total per person.",
+                    "Optional: Bring swimwear and dry bag for river activities."
                   ].map((reminder, index) => (
                     <div key={index} className="flex items-start gap-3">
-                      <span className="text-green-500 mt-1">✓</span>
-                      <span className="text-gray-700 text-sm">{reminder}</span>
+                      <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600 text-xs">
+                        ✓
+                      </span>
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        {reminder}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl p-6 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">⚠️</div>
-                  <div className="text-lg font-semibold text-gray-900 mb-2">Safety First</div>
-                  <div className="text-sm text-gray-700">
-                    Mountain climbing can be dangerous. Always hike with experienced guides, especially for {mountain.difficulty.toLowerCase()} difficulty trails.
+
+              {/* Safety Card */}
+              <div className="bg-gradient-to-br from-orange-50 via-orange-100 to-orange-200 rounded-xl p-6 flex items-center justify-center border border-orange-100">
+                <div className="max-w-sm text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/70 shadow-sm">
+                    <span className="text-3xl">⚠️</span>
                   </div>
+                  <div className="text-sm font-semibold text-orange-900 tracking-wide uppercase mb-1">
+                    Safety First
+                  </div>
+                  <p className="text-lg font-semibold text-gray-900 mb-2">
+                    Respect the mountain and your limits.
+                  </p>
+                  <p className="text-sm text-gray-800 leading-relaxed">
+                    Mountain climbing can be dangerous. Always hike with experienced, local guides,
+                    check the latest weather, and be extra cautious on{" "}
+                    <span className="font-semibold lowercase">{mountain.difficulty}</span> difficulty trails.
+                  </p>
                 </div>
               </div>
             </div>
@@ -698,6 +731,15 @@ function MountainDetail() {
                 </div>
               )}
 
+              {bookingSuccess && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center">
+                    <div className="text-green-500 mr-3">✔</div>
+                    <p className="text-green-800 text-sm">{bookingSuccess}</p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="bookingDate" className="block text-sm font-semibold text-gray-700 mb-2">
                   Select Date
@@ -713,6 +755,57 @@ function MountainDetail() {
                 />
               </div>
 
+              <div>
+                <label htmlFor="numberOfParticipants" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Number of Participants (Pax) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNumberOfParticipants(Math.max(1, numberOfParticipants - 1))}
+                    disabled={numberOfParticipants <= 1}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg border-2 transition-all ${
+                      numberOfParticipants <= 1
+                        ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                        : 'border-gray-300 text-gray-700 hover:bg-orange-50 hover:border-orange-500 hover:text-orange-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                    </svg>
+                  </button>
+                  <input
+                    type="number"
+                    id="numberOfParticipants"
+                    value={numberOfParticipants}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 1;
+                      if (value >= 1 && value <= 20) {
+                        setNumberOfParticipants(value);
+                      }
+                    }}
+                    min={1}
+                    max={20}
+                    required
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-center font-semibold text-gray-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setNumberOfParticipants(Math.min(20, numberOfParticipants + 1))}
+                    disabled={numberOfParticipants >= 20}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg border-2 transition-all ${
+                      numberOfParticipants >= 20
+                        ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                        : 'border-gray-300 text-gray-700 hover:bg-orange-50 hover:border-orange-500 hover:text-orange-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-semibold text-gray-900 mb-2">Booking Details</h4>
                 <div className="text-sm text-gray-600 space-y-1">
@@ -720,6 +813,7 @@ function MountainDetail() {
                   <p><strong>Location:</strong> {mountain.location}</p>
                   <p><strong>Difficulty:</strong> {mountain.difficulty}</p>
                   <p><strong>Elevation:</strong> {mountain.elevation.toLocaleString()}m</p>
+                  <p><strong>Pax:</strong> {numberOfParticipants}</p>
                 </div>
               </div>
 

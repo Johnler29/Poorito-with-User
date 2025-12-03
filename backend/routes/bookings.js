@@ -18,6 +18,7 @@ router.get('/my-bookings', authenticateToken, async (req, res) => {
         mountain_id,
         booking_date,
         status,
+        number_of_participants,
         created_at,
         mountains (
           id,
@@ -49,11 +50,17 @@ router.get('/my-bookings', authenticateToken, async (req, res) => {
 // Create a new booking
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { mountain_id, booking_date } = req.body;
+    const { mountain_id, booking_date, number_of_participants } = req.body;
     const user_id = req.user.userId;
 
     if (!mountain_id || !booking_date) {
       return res.status(400).json({ error: 'Mountain ID and booking date are required' });
+    }
+
+    // Validate number of participants (default to 1 if not provided)
+    const participants = number_of_participants ? parseInt(number_of_participants) : 1;
+    if (participants < 1 || participants > 20) {
+      return res.status(400).json({ error: 'Number of participants must be between 1 and 20' });
     }
 
     // Create user-scoped client
@@ -97,19 +104,23 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     // Create booking using service role client (bypasses RLS)
+    const bookingData = {
+      user_id,
+      mountain_id,
+      booking_date,
+      status: 'confirmed',
+      number_of_participants: participants
+    };
+
     const { data: newBooking, error } = await supabase
       .from('bookings')
-      .insert([{
-        user_id,
-        mountain_id,
-        booking_date,
-        status: 'confirmed'
-      }])
+      .insert([bookingData])
       .select(`
         id,
         mountain_id,
         booking_date,
         status,
+        number_of_participants,
         created_at,
         mountains (
           id,
@@ -183,11 +194,13 @@ router.put('/:id/cancel', authenticateToken, async (req, res) => {
     }
 
     // Update booking status
+    const now = new Date().toISOString();
     const { data: updatedBooking, error } = await supabase
       .from('bookings')
       .update({ 
         status: 'cancelled',
-        updated_at: new Date().toISOString()
+        updated_at: now,
+        cancelled_at: now
       })
       .eq('id', id)
       .eq('user_id', user_id)
@@ -196,6 +209,7 @@ router.put('/:id/cancel', authenticateToken, async (req, res) => {
         mountain_id,
         booking_date,
         status,
+        number_of_participants,
         updated_at,
         mountains (
           id,
@@ -240,6 +254,7 @@ router.get('/:id/receipt', authenticateToken, async (req, res) => {
         mountain_id,
         booking_date,
         status,
+        number_of_participants,
         created_at,
         updated_at,
         mountains (
@@ -283,6 +298,7 @@ router.get('/:id/receipt', authenticateToken, async (req, res) => {
       booking: {
         booking_date: booking.booking_date,
         status: booking.status,
+        number_of_participants: booking.number_of_participants || 1,
         created_at: booking.created_at,
         updated_at: booking.updated_at
       },
@@ -309,6 +325,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
         mountain_id,
         booking_date,
         status,
+        number_of_participants,
         created_at,
         updated_at,
         mountains (

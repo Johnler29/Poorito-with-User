@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import apiService from '../services/api';
 
 function ArticlesGuides() {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentDate = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     day: 'numeric', 
@@ -15,11 +16,27 @@ function ArticlesGuides() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [feedback, setFeedback] = useState(location.state?.success || '');
+  const [feedbackType, setFeedbackType] = useState('success');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [articleToDelete, setArticleToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch articles from API
   useEffect(() => {
     fetchArticles();
   }, []);
+
+  // Initialize feedback from navigation state and then clear it from history
+  useEffect(() => {
+    if (location.state?.success) {
+      setFeedback(location.state.success);
+      setFeedbackType('success');
+      if (window?.history?.replaceState) {
+        window.history.replaceState({}, document.title, location.pathname);
+      }
+    }
+  }, [location]);
 
   const fetchArticles = async () => {
     try {
@@ -40,16 +57,34 @@ function ArticlesGuides() {
     navigate(`/admin/articles-guides/edit/${id}`);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this article?')) {
-      try {
-        await apiService.deleteArticle(id);
-        setArticles(articles.filter(article => article.id !== id));
-        alert('Article deleted successfully!');
-      } catch (err) {
-        console.error('Error deleting article:', err);
-        alert('Failed to delete article. Please try again.');
-      }
+  const openDeleteModal = (article) => {
+    setArticleToDelete(article);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteLoading) return;
+    setShowDeleteModal(false);
+    setArticleToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
+
+    try {
+      setDeleteLoading(true);
+      await apiService.deleteArticle(articleToDelete.id);
+      setArticles(prev => prev.filter(article => article.id !== articleToDelete.id));
+      setFeedback('Article deleted successfully.');
+      setFeedbackType('success');
+    } catch (err) {
+      console.error('Error deleting article:', err);
+      setFeedback('Failed to delete article. Please try again.');
+      setFeedbackType('error');
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
+      setArticleToDelete(null);
     }
   };
 
@@ -97,17 +132,38 @@ function ArticlesGuides() {
             </button>
           </div>
         </div>
+
+        {feedback && (
+          <div
+            className={`mx-6 mt-4 mb-2 rounded-lg border px-4 py-3 text-sm flex items-start gap-2 ${
+              feedbackType === 'success'
+                ? 'bg-green-50 border-green-200 text-green-800'
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}
+          >
+            <span className="mt-0.5">
+              {feedbackType === 'success' ? '✅' : '⚠️'}
+            </span>
+            <div className="flex-1">{feedback}</div>
+            <button
+              type="button"
+              onClick={() => setFeedback('')}
+              className="ml-2 text-xs text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed">
+          <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="w-20 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</th>
-                <th className="w-32 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mountain Name</th>
+                <th className="w-40 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mountain Name</th>
                 <th className="px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
-                <th className="w-24 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Author</th>
-                <th className="w-24 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Link</th>
-                <th className="w-24 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                <th className="w-40 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Author</th>
+                <th className="w-28 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
                 <th className="w-32 px-4 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
@@ -170,22 +226,10 @@ function ArticlesGuides() {
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">✍️</span>
-                        <span className="text-sm text-gray-600 truncate">{article.author || 'Admin'}</span>
+                        <span className="text-sm text-gray-600 whitespace-nowrap">
+                          {article.author || 'Admin'}
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      {article.link ? (
-                        <a 
-                          href={article.link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-xs text-orange-600 hover:text-orange-700 hover:underline flex items-center gap-1"
-                        >
-                          🔗 View
-                        </a>
-                      ) : (
-                        <span className="text-xs text-gray-400">No link</span>
-                      )}
                     </td>
                     <td className="px-4 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${
@@ -210,7 +254,7 @@ function ArticlesGuides() {
                         </button>
                         <button 
                           className="px-3 py-1.5 text-red-600 hover:bg-red-50 border border-red-300 hover:border-red-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
-                          onClick={() => handleDelete(article.id)}
+                          onClick={() => openDeleteModal(article)}
                           title="Delete article"
                         >
                           <span>🗑️</span>
@@ -225,6 +269,61 @@ function ArticlesGuides() {
           </table>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && articleToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete article?</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  This action cannot be undone. This will permanently remove{' '}
+                  <span className="font-semibold">{articleToDelete.title}</span>.
+                </p>
+              </div>
+              <button
+                onClick={closeDeleteModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-6 rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-700">
+              <p className="font-semibold text-gray-900 mb-1">
+                {articleToDelete.title}
+              </p>
+              <p className="text-gray-600">
+                Author: <span className="font-medium">{articleToDelete.author || 'Admin'}</span>
+              </p>
+              <p className="mt-1 text-gray-600">
+                Category: <span className="font-medium">{articleToDelete.category || 'Article'}</span>
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-60"
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete Article'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

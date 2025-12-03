@@ -19,7 +19,6 @@ function MountainForm() {
   const [thingsToBring, setThingsToBring] = useState(['']);
   const [hikeItinerary, setHikeItinerary] = useState([{ title: '', description: '', location: '', time: '' }]);
   const [transportationGuides, setTransportationGuides] = useState([{ header: '', title: '', description: '' }]);
-  const [reminders] = useState([{ description: '' }]);
   const [fees, setFees] = useState({
     environmentalFee: '',
     registrationFee: '',
@@ -200,17 +199,21 @@ function MountainForm() {
       if (isEdit) {
         await apiService.updateMountain(id, mountainData);
         mountainId = id;
-        alert('Mountain updated successfully!');
       } else {
         const response = await apiService.createMountain(mountainData);
         mountainId = response.mountain.id;
-        alert('Mountain created successfully!');
       }
 
       // Save mountain details
       await saveMountainDetails(mountainId);
 
-      navigate('/admin/mountains');
+      navigate('/admin/mountains', {
+        state: {
+          success: isEdit
+            ? 'Mountain updated successfully!'
+            : 'Mountain created successfully!'
+        }
+      });
     } catch (err) {
       console.error('Error saving mountain:', err);
       setError('Failed to save mountain. Please try again.');
@@ -573,39 +576,6 @@ function MountainForm() {
           >
             +
           </button>
-        </div>
-
-        <div className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">Link</h2>
-          <input 
-            type="text" 
-            placeholder="URL" 
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-          />
-        </div>
-
-        <div className="space-y-4 pt-6 border-t">
-          <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wide">Reminders</h2>
-          {reminders.map((item, index) => (
-            <div key={index} className="flex gap-3">
-              <textarea 
-                placeholder="Description" 
-                rows="2"
-                defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none"
-              ></textarea>
-              <button className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
-                🗑️
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-center pt-6">
-          <div className="w-48 aspect-video bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex flex-col items-center justify-center">
-            <div className="text-4xl">☁️</div>
-            <div className="text-4xl">⛰️</div>
-          </div>
         </div>
 
         <div className="flex justify-center pt-6">

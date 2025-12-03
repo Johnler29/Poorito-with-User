@@ -213,10 +213,14 @@ class ApiService {
     return this.request('/bookings/my-bookings');
   }
 
-  async createBooking(mountainId, bookingDate) {
+  async createBooking(mountainId, bookingDate, numberOfParticipants = 1) {
     return this.request('/bookings', {
       method: 'POST',
-      body: JSON.stringify({ mountain_id: mountainId, booking_date: bookingDate }),
+      body: JSON.stringify({ 
+        mountain_id: mountainId, 
+        booking_date: bookingDate,
+        number_of_participants: numberOfParticipants
+      }),
     });
   }
 
@@ -232,24 +236,6 @@ class ApiService {
 
   async getBookingReceipt(bookingId) {
     return this.request(`/bookings/${bookingId}/receipt`);
-  }
-
-  // Weather endpoints
-  async getCurrentWeatherByCoords(lat, lon) {
-    return this.request(`/weather/current/${lat}/${lon}`);
-  }
-
-  async getCurrentWeatherByCity(city, country = null) {
-    const endpoint = country ? `/weather/current/city/${city}?country=${country}` : `/weather/current/city/${city}`;
-    return this.request(endpoint);
-  }
-
-  async getWeatherForecast(lat, lon) {
-    return this.request(`/weather/forecast/${lat}/${lon}`);
-  }
-
-  async getWeatherAlerts(lat, lon) {
-    return this.request(`/weather/alerts/${lat}/${lon}`);
   }
 
   // Mountain details endpoints

@@ -154,22 +154,30 @@ function Receipt() {
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Booking Information</h2>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Booking ID:</span>
+                <div className="flex items-baseline">
+                  <span className="w-40 text-gray-600">Booking ID:</span>
                   <span className="font-medium text-gray-900">#{receipt.booking_id}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Booking Date:</span>
+                <div className="flex items-baseline">
+                  <span className="w-40 text-gray-600">Booking Date:</span>
                   <span className="font-medium text-gray-900">{formatDate(receipt.booking.booking_date)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Status:</span>
+                <div className="flex items-baseline">
+                  <span className="w-40 text-gray-600">Status:</span>
                   <span className={`font-medium ${getStatusColor(receipt.booking.status)}`}>
                     {receipt.booking.status.charAt(0).toUpperCase() + receipt.booking.status.slice(1)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Booked On:</span>
+                {receipt.booking.number_of_participants && (
+                  <div className="flex items-baseline">
+                    <span className="w-40 text-gray-600">Participants:</span>
+                    <span className="font-medium text-gray-900">
+                      {receipt.booking.number_of_participants} {receipt.booking.number_of_participants === 1 ? 'person' : 'people'}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-baseline">
+                  <span className="w-40 text-gray-600">Booked On:</span>
                   <span className="font-medium text-gray-900">{formatDateTime(receipt.booking.created_at)}</span>
                 </div>
               </div>
@@ -209,17 +217,17 @@ function Receipt() {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{receipt.mountain?.name}</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600">Location:</span>
-                      <span className="ml-2 font-medium text-gray-900">{receipt.mountain?.location}</span>
+                    <div className="flex items-baseline">
+                      <span className="w-24 text-gray-600">Location:</span>
+                      <span className="font-medium text-gray-900">{receipt.mountain?.location}</span>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Difficulty:</span>
-                      <span className="ml-2 font-medium text-gray-900">{receipt.mountain?.difficulty}</span>
+                    <div className="flex items-baseline">
+                      <span className="w-24 text-gray-600">Difficulty:</span>
+                      <span className="font-medium text-gray-900">{receipt.mountain?.difficulty}</span>
                     </div>
-                    <div>
-                      <span className="text-gray-600">Elevation:</span>
-                      <span className="ml-2 font-medium text-gray-900">{receipt.mountain?.elevation}m</span>
+                    <div className="flex items-baseline">
+                      <span className="w-24 text-gray-600">Elevation:</span>
+                      <span className="font-medium text-gray-900">{receipt.mountain?.elevation}m</span>
                     </div>
                   </div>
                   {receipt.mountain?.description && (

@@ -123,20 +123,28 @@ function Home() {
             </p>
             <div className="w-full max-w-2xl mb-8 relative">
               <div className="relative">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
                 <input 
                   value={cityQuery} 
                   onChange={handleSearchChange}
                   onFocus={() => setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} // Delay to allow clicks on suggestions
-                  className="w-full border-2 border-gray-200 rounded-xl px-6 py-4 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-md hover:border-gray-300" 
+                  className="w-full border-2 border-gray-200 rounded-xl pl-12 pr-12 py-4 text-base focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all shadow-md hover:border-gray-300" 
                   placeholder="Search by city, mountain name, or location..." 
                 />
                 {cityQuery && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                    aria-label="Clear search"
                   >
-                    ✕
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 )}
               </div>
@@ -231,13 +239,13 @@ function Home() {
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filteredCalabarzon.slice(0, cityQuery ? filteredCalabarzon.length : 4).map((mountain) => (
-                      <div key={mountain.id} className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                      <div key={mountain.id} className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
                         <div className="relative h-44 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 overflow-hidden">
                           {mountain.image_url ? (
                             <img 
                               src={mountain.image_url} 
                               alt={mountain.name} 
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -245,21 +253,31 @@ function Home() {
                             </div>
                           )}
                           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors" />
+                          <div className="absolute top-3 right-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border ${
+                              mountain.difficulty === 'Easy' ? 'bg-green-500/90 text-white border-green-400' :
+                              mountain.difficulty === 'Moderate' ? 'bg-yellow-500/90 text-white border-yellow-400' :
+                              mountain.difficulty === 'Hard' ? 'bg-orange-500/90 text-white border-orange-400' :
+                              'bg-red-500/90 text-white border-red-400'
+                            }`}>
+                              {mountain.difficulty}
+                            </span>
+                          </div>
                           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
                         </div>
                         <div className="p-5">
-                          <h3 className="font-bold text-gray-900 text-lg mb-3">{mountain.name}</h3>
+                          <h3 className="font-bold text-gray-900 text-lg mb-3 group-hover:text-orange-600 transition-colors">{mountain.name}</h3>
                           <div className="space-y-2 mb-4">
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">📍</span>
-                              <span>Location: <span className="font-medium text-gray-900">{mountain.location}</span></span>
+                              <span className="mr-2 text-base">📍</span>
+                              <span className="truncate">Location: <span className="font-medium text-gray-900">{mountain.location}</span></span>
                             </div>
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">📏</span>
+                              <span className="mr-2 text-base">📏</span>
                               <span>Elevation: <span className="font-medium text-gray-900">{mountain.elevation.toLocaleString()}m</span></span>
                             </div>
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">⚡</span>
+                              <span className="mr-2 text-base">⚡</span>
                               <span>Difficulty: <span className={`font-semibold ${
                                 mountain.difficulty === 'Easy' ? 'text-green-600' :
                                 mountain.difficulty === 'Moderate' ? 'text-yellow-600' :
@@ -289,13 +307,13 @@ function Home() {
                   )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {filteredBeyond.slice(0, cityQuery ? filteredBeyond.length : 4).map((mountain) => (
-                      <div key={mountain.id} className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                        <div className="relative h-44 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 overflow-hidden">
+                      <div key={mountain.id} className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                        <div className="relative h-44 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 overflow-hidden">
                           {mountain.image_url ? (
                             <img 
                               src={mountain.image_url} 
                               alt={mountain.name} 
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -303,21 +321,31 @@ function Home() {
                             </div>
                           )}
                           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-colors" />
+                          <div className="absolute top-3 right-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm border ${
+                              mountain.difficulty === 'Easy' ? 'bg-green-500/90 text-white border-green-400' :
+                              mountain.difficulty === 'Moderate' ? 'bg-yellow-500/90 text-white border-yellow-400' :
+                              mountain.difficulty === 'Hard' ? 'bg-orange-500/90 text-white border-orange-400' :
+                              'bg-red-500/90 text-white border-red-400'
+                            }`}>
+                              {mountain.difficulty}
+                            </span>
+                          </div>
                           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
                         </div>
                         <div className="p-5">
-                          <h3 className="font-bold text-gray-900 text-lg mb-3">{mountain.name}</h3>
+                          <h3 className="font-bold text-gray-900 text-lg mb-3 group-hover:text-orange-600 transition-colors">{mountain.name}</h3>
                           <div className="space-y-2 mb-4">
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">📍</span>
-                              <span>Location: <span className="font-medium text-gray-900">{mountain.location}</span></span>
+                              <span className="mr-2 text-base">📍</span>
+                              <span className="truncate">Location: <span className="font-medium text-gray-900">{mountain.location}</span></span>
                             </div>
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">📏</span>
+                              <span className="mr-2 text-base">📏</span>
                               <span>Elevation: <span className="font-medium text-gray-900">{mountain.elevation.toLocaleString()}m</span></span>
                             </div>
                             <div className="flex items-center text-sm text-gray-600">
-                              <span className="mr-2">⚡</span>
+                              <span className="mr-2 text-base">⚡</span>
                               <span>Difficulty: <span className={`font-semibold ${
                                 mountain.difficulty === 'Easy' ? 'text-green-600' :
                                 mountain.difficulty === 'Moderate' ? 'text-yellow-600' :
@@ -328,7 +356,7 @@ function Home() {
                           </div>
                           <button 
                             onClick={() => navigate(`/mountains/${mountain.id}`)}
-                            className="w-full px-4 py-2.5 rounded-lg text-white text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+                            className="w-full px-4 py-2.5 rounded-lg text-white text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
                           >
                             Explore
                           </button>
@@ -340,9 +368,13 @@ function Home() {
               )}
             </div>
           )}
-          <div className="text-center mt-12">
-            <a href="/explore" className="inline-block px-8 py-3 rounded-full text-sm font-semibold bg-white border-2 border-gray-200 hover:border-orange-500 hover:text-orange-600 transition-all shadow-sm hover:shadow-md">
-              See more trails
+          <div className="text-center mt-16">
+            <a 
+              href="/explore" 
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-base font-semibold bg-white border-2 border-gray-200 hover:border-orange-500 hover:text-orange-600 transition-all shadow-sm hover:shadow-lg hover:scale-105 group"
+            >
+              <span>See more trails</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
             </a>
           </div>
         </div>
@@ -352,23 +384,62 @@ function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto space-y-8">
           {[
-            {title:'Safety Tips',text:'Hydrate, pace yourself, and check weather before heading out. Always inform someone of your plans.',icon:'🛡️'},
-            {title:'Leave No Trace',text:'Pack out all trash, stay on marked trails, and respect wildlife and cultural sites.',icon:'🌿'}
-          ].map((b)=>(
-            <div key={b.title} className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all">
-              <div className="grid md:grid-cols-2 gap-8 items-center p-8">
-                <div className="h-48 md:h-64 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                  <div className="text-8xl opacity-20">{b.icon}</div>
+            {
+              title: 'Safety Tips',
+              text: 'Hydrate, pace yourself, and check weather before heading out. Always inform someone of your plans.',
+              icon: '🛡️',
+              tag: 'Trail safety basics',
+            },
+            {
+              title: 'Leave No Trace',
+              text: 'Pack out all trash, stay on marked trails, and respect wildlife and cultural sites.',
+              icon: '🌿',
+              tag: 'Responsible hiking',
+            },
+          ].map((b, index) => (
+            <div
+              key={b.title}
+              className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all"
+            >
+              <div
+                className={`grid md:grid-cols-2 gap-6 md:gap-10 items-stretch p-6 sm:p-8 ${
+                  index % 2 === 1 ? 'md:flex-row-reverse' : ''
+                }`}
+              >
+                {/* Illustration panel */}
+                <div className="h-44 sm:h-52 md:h-56 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 relative flex items-center justify-center shadow-inner">
+                  <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top,_#ffffff33,_transparent_55%)]" />
+                  <div className="relative flex flex-col items-center justify-center">
+                    <div className="text-6xl sm:text-7xl">{b.icon}</div>
+                    <span className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/15 text-white border border-white/20 backdrop-blur">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                      {b.tag}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{b.title}</h3>
-                  <p className="text-gray-700 text-base leading-relaxed mb-6">{b.text}</p>
-                  <button 
-                    onClick={() => navigate('/guides')}
-                    className="px-6 py-3 rounded-lg text-white text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition-all"
-                  >
-                    Read more
-                  </button>
+
+                {/* Content panel */}
+                <div className="flex flex-col justify-center">
+                  <p className="text-xs font-semibold tracking-[0.18em] uppercase text-orange-500 mb-2">
+                    Guides
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">
+                    {b.title}
+                  </h3>
+                  <p className="text-gray-700 text-base leading-relaxed mb-6">
+                    {b.text}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => navigate('/guides')}
+                      className="px-6 py-3 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition-all"
+                    >
+                      Read more
+                    </button>
+                    <span className="text-xs text-gray-500">
+                      3–5 minute read in hiking guides
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

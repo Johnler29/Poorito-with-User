@@ -83,9 +83,11 @@ CREATE TABLE IF NOT EXISTS bookings (
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     mountain_id BIGINT REFERENCES mountains(id) ON DELETE CASCADE,
     booking_date DATE NOT NULL,
+    number_of_participants INTEGER DEFAULT 1 CHECK (number_of_participants >= 1 AND number_of_participants <= 20),
     status TEXT CHECK (status IN ('confirmed', 'cancelled', 'completed')) DEFAULT 'confirmed',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    cancelled_at TIMESTAMP WITH TIME ZONE,
     UNIQUE(user_id, mountain_id, booking_date)
 );
 

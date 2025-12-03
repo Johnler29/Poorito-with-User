@@ -78,12 +78,6 @@ function Header() {
                 <p className="text-xs text-gray-500">{user.email || ''}</p>
               </div>
               <button
-                onClick={() => navigate('/admin/settings')}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                ⚙️ Settings
-              </button>
-              <button
                 onClick={() => navigate('/')}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >

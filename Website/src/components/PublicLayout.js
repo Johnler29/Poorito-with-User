@@ -48,11 +48,51 @@ function PublicLayout() {
             <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Poorito</span>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Home</Link>
-            <Link to="/explore" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/explore') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Explore</Link>
-            <Link to="/guides" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/guides') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>Guides</Link>
-            <Link to="/about" onClick={scrollToTop} className={`text-sm font-medium ${isActive('/about') ? 'text-primary' : 'text-gray-700 hover:text-gray-900'}`}>About</Link>
+          <nav className="hidden md:flex items-center space-x-2 bg-gray-50/60 px-2 py-1 rounded-full shadow-sm border border-gray-100">
+            <Link
+              to="/"
+              onClick={scrollToTop}
+              className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                isActive('/')
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-700 hover:text-primary hover:bg-white'
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              to="/explore"
+              onClick={scrollToTop}
+              className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                isActive('/explore')
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-700 hover:text-primary hover:bg-white'
+              }`}
+            >
+              Explore
+            </Link>
+            <Link
+              to="/guides"
+              onClick={scrollToTop}
+              className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                isActive('/guides')
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-700 hover:text-primary hover:bg-white'
+              }`}
+            >
+              Guides
+            </Link>
+            <Link
+              to="/about"
+              onClick={scrollToTop}
+              className={`relative px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                isActive('/about')
+                  ? 'bg-primary text-white shadow-md'
+                  : 'text-gray-700 hover:text-primary hover:bg-white'
+              }`}
+            >
+              About
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-3">
